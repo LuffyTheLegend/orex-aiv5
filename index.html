@@ -560,12 +560,19 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
         <div id="settings-tab-general" class="settings-tab-content" role="tabpanel">
           <div class="settings-section-title">Profile</div>
           <div class="settings-avatar-row">
-  <div class="settings-avatar" id="settings-avatar">O</div>
-  <div class="settings-avatar-info">
-    <strong id="settings-avatar-name">Orex</strong>
-    <span>Your personal AI chat</span>
-  </div>
-</div>
+            <div class="settings-avatar" id="settings-avatar-user">Y</div>
+            <div class="settings-avatar-info">
+              <strong id="settings-avatar-user-name">You</strong>
+              <span>That's you</span>
+            </div>
+          </div>
+          <div class="settings-avatar-row">
+            <div class="settings-avatar" id="settings-avatar">O</div>
+            <div class="settings-avatar-info">
+              <strong id="settings-avatar-name">Orex</strong>
+              <span>Your personal AI chat</span>
+            </div>
+          </div>
           <div class="settings-group">
             <label for="rex-name">Orex's Name</label>
             <input id="rex-name" type="text" placeholder="Orex" maxlength="30">
@@ -729,12 +736,13 @@ const persistActive=()=>save('orex.active',chats.some(c=>c.id===activeId&&!c.tem
 /* ================= chrome ================= */
 function applyTheme(){document.documentElement.dataset.theme=settings.theme}
 function applyBrand(){
-  $('#rex-header-title').textContent=settings.rexName||'Orex';
-  $('#rex-header-subtitle').textContent=settings.userName?`for ${settings.userName}`:'Your AI companion';
-  $('#settings-avatar').textContent=(settings.rexName||'O')[0].toUpperCase();
-  $('#settings-avatar-name').textContent=settings.rexName||'Orex';
-  $('#settings-avatar-user').textContent=(settings.userName||'Y')[0].toUpperCase();
-  $('#settings-avatar-user-name').textContent=settings.userName||'You';
+  const set=(sel,txt)=>{const el=$(sel);if(el)el.textContent=txt};
+  set('#rex-header-title',settings.rexName||'Orex');
+  set('#rex-header-subtitle',settings.userName?`for ${settings.userName}`:'Your AI companion');
+  set('#settings-avatar',(settings.rexName||'O')[0].toUpperCase());
+  set('#settings-avatar-name',settings.rexName||'Orex');
+  set('#settings-avatar-user',(settings.userName||'Y')[0].toUpperCase());
+  set('#settings-avatar-user-name',settings.userName||'You');
   document.title=(settings.rexName||'Orex')+' AI';
 }
 function setStatus(t,cls=''){const s=$('#status');s.textContent=t;s.className=cls}
