@@ -645,12 +645,15 @@ const fmtTime=ts=>new Date(ts||Date.now()).toLocaleTimeString([],{hour:'2-digit'
 const load=(k,f)=>{try{const v=JSON.parse(localStorage.getItem(k));return v??f}catch(_){return f}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(_){toast('Storage is full — export & delete old chats','warn')}};
 
-/* ================= config — update model ids here if Groq rotates them ================= */
+/* ================= config ================= */
 const CFG={
   base:'https://api.groq.com/openai/v1',
-  model:'llama-3.3-70b-versatile',                    // main chat
-  fast:'llama-3.1-8b-instant',                        // memory extraction
-  vision:'meta-llama/llama-4-scout-17b-16e-instruct', // when images are attached
+  // Orex fetches your account's live model list and picks the first available
+  // model from these priority lists — Groq rotations can't break it anymore.
+  prefer:['llama-3.3-70b-versatile','openai/gpt-oss-120b','meta-llama/llama-4-maverick-17b-128e-instruct','llama-3.1-8b-instant'],
+  visionPrefer:['meta-llama/llama-4-scout-17b-16e-instruct','meta-llama/llama-4-maverick-17b-128e-instruct'],
+  fastPrefer:['llama-3.1-8b-instant','openai/gpt-oss-20b'],
+  fast:'llama-3.1-8b-instant', // fallback used by memory extraction
 };
 const MODES={
   smart:{label:'Smart',temp:.7},
@@ -994,9 +997,32 @@ async function sendMessage(){
   await streamReply(chat);
   maybeRemember(chat);
 }
+/* ---- live model picker: asks Groq what exists, picks the best available ---- */
+let modelCache=load('orex.models',{ids:null,ts:0});
+async function groqModels(force){
+  if(!force&&modelCache.ids&&Date.now()-modelCache.ts<3600e3)return modelCache.ids;
+  const r=await fetch(CFG.base+'/models',{headers:{'Authorization':'Bearer '+settings.apiKey}});
+  if(!r.ok)throw new Error('Could not read Groq model list ('+r.status+')');
+  const ids=((await r.json()).data||[]).map(m=>m.id);
+  modelCache={ids,ts:Date.now()};save('orex.models',modelCache);
+  return ids;
+}
+function pickFrom(ids,prefer){
+  for(const p of prefer){if(ids.includes(p))return p}
+  const rx=prefer.map(p=>p.replace(/^.*\//,'').split('-').slice(0,2).join('.*')).join('|');
+  return ids.find(id=>new RegExp(rx,'i').test(id))
+      ||ids.find(id=>/70b|120b|maverick|kimi|qwen/i.test(id))
+      ||ids[0]||null;
+}
+async function pickModel(wantsVision){
+  const ids=await groqModels();
+  return (wantsVision?pickFrom(ids,CFG.visionPrefer):null)||pickFrom(ids,CFG.prefer);
+}
+
 async function streamReply(chat){
   const lastUser=[...chat.messages].reverse().find(m=>m.role==='user');
-  const model=(lastUser&&lastUser.images&&lastUser.images.length)?CFG.vision:CFG.model;
+  const model=await pickModel(!!(lastUser&&lastUser.images&&lastUser.images.length));
+  if(!model)throw new Error('Your Groq account returned no models — generate a fresh key at console.groq.com/keys.');
   streaming=true;setStreamUI(true);setStatus('Thinking…','busy');
   const aMsg={role:'assistant',content:'',ts:Date.now()};
   const ph=buildMsg(aMsg,chat.messages.length,chat);
@@ -1029,7 +1055,13 @@ async function streamReply(chat){
       body:JSON.stringify({model,messages:apiMessages(chat),stream:true,temperature:MODES[settings.mode].temp}),
       signal:controller.signal
     });
-    if(!res.ok)throw new Error(humanError(res.status,await res.json().catch(()=>null)));
+    if(!res.ok){
+      if(res.status===404){
+        groqModels(true).catch(()=>{}); // force-refresh the model list for next time
+        throw new Error('That model ID no longer exists on Groq — send your message again and I\'ll auto-pick a working one.');
+      }
+      throw new Error(humanError(res.status,await res.json().catch(()=>null)));
+    }
     setStatus('Streaming…','busy');
     const reader=res.body.getReader(),dec=new TextDecoder();
     let buf='';
