@@ -174,8 +174,8 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
 .send-btn.stop{background:var(--danger);color:#fff}
 
 /* ---------- floating menus ---------- */
-.menu{position:absolute;left:50%;transform:translateX(-50%) translateY(6px);bottom:calc(100% - 6px);background:var(--bg3);border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow);padding:6px;min-width:280px;opacity:0;pointer-events:none;transition:.18s;z-index:20}
-.menu.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.menu{position:absolute;left:max(18px,calc((100% - 840px)/2));bottom:calc(100% - 6px);background:var(--bg3);border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow);padding:6px;min-width:280px;opacity:0;pointer-events:none;transform:translateY(6px);transition:.18s;z-index:20}
+.menu.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 .mode-menu{min-width:330px}
 .attach-item,.mode-item{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:10px 12px;border-radius:11px}
 .attach-item:hover,.mode-item:hover{background:var(--bg2)}
@@ -450,9 +450,11 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
       </div>
     </div>
     <p class="about-copy">
-      Orex AI is a focused AI workspace with a polished glassy interface, fast Groq-powered streaming replies,
-      vision support for images, file context, and a suite of research tools — all running client-side in a single file.
-    </p>
+  Orex AI is a focused AI workspace with streaming Groq-powered replies, vision support, file context,
+  and research tools — all running client-side in a single file. It's the third of three, built with AI itself:
+  first <strong>Oppa</strong>, then <strong>Rex</strong>, now <strong>Orex</strong> — each one a rebuild
+  with everything the last one taught me.
+</p>
     <div class="about-section">
       <h3>Features</h3>
       <ul class="feature-list">
@@ -469,7 +471,7 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
     </div>
     <div class="about-meta">
       <div class="about-card"><span class="about-label">Version</span><strong>v1.5</strong></div>
-      <div class="about-card"><span class="about-label">Knowledge</span><strong>~2025 + live tools</strong></div>
+      <div class="about-card"><span class="about-label">Estimate</span><strong>2025</strong></div>
       <div class="about-card"><span class="about-label">Credits</span><strong>Groq API · Phillip Jones IV</strong></div>
     </div>
     <p class="about-fineprint">Model training data is roughly current through 2025 (Groq doesn't publish exact cutoffs). For anything more recent, use Research URLs or Wikipedia lookup instead of guessing.</p>
