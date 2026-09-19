@@ -85,7 +85,7 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
 .header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px)}
 .status-wrap{display:flex;align-items:center;gap:14px;min-width:0}
 #menu-btn{display:none}
-#status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim)}
+#status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #status::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--ok);flex:none}
 #status.busy::before{background:var(--warn);animation:pulse 1s infinite}
 #status.err::before{background:var(--danger)}
@@ -125,6 +125,7 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
 .msg-imgs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
 .msg-imgs img{width:120px;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
 .msg-acts{display:flex;gap:4px;margin-top:6px;opacity:0;transition:opacity .15s}
+.msg.user .msg-acts{justify-content:flex-end}
 .msg:hover .msg-acts{opacity:1}
 .msg-acts button{font-size:11.5px;color:var(--faint);padding:3px 8px;border-radius:6px}
 .msg-acts button:hover{background:var(--bg3);color:var(--ink)}
@@ -173,7 +174,7 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
 .send-btn:hover{background:var(--accent-strong)}
 .send-btn.stop{background:var(--danger);color:#fff}
 
-/* ---------- floating menus ---------- */
+/* ---------- floating menus (left-aligned to the input bar) ---------- */
 .menu{position:absolute;left:max(18px,calc((100% - 840px)/2));bottom:calc(100% - 6px);background:var(--bg3);border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow);padding:6px;min-width:280px;opacity:0;pointer-events:none;transform:translateY(6px);transition:.18s;z-index:20}
 .menu.show{opacity:1;pointer-events:auto;transform:translateY(0)}
 .mode-menu{min-width:330px}
@@ -244,6 +245,7 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
 .appearance-option.active{background:var(--accent);color:var(--on-accent)}
 .settings-avatar-row{display:flex;gap:13px;align-items:center;background:var(--bg3);border:1px solid var(--line);border-radius:14px;padding:13px 15px;margin-bottom:18px}
 .settings-avatar{width:44px;height:44px;border-radius:13px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:18px}
+.settings-avatar.you{background:var(--bg);border:1px solid var(--line2);color:var(--dim)}
 .settings-avatar-info{display:flex;flex-direction:column}
 .settings-avatar-info span{color:var(--faint);font-size:12px}
 .api-key-help{background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px}
@@ -450,11 +452,11 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
       </div>
     </div>
     <p class="about-copy">
-  Orex AI is a focused AI workspace with streaming Groq-powered replies, vision support, file context,
-  and research tools — all running client-side in a single file. It's the third of three, built with AI itself:
-  first <strong>Oppa</strong>, then <strong>Rex</strong>, now <strong>Orex</strong> — each one a rebuild
-  with everything the last one taught me.
-</p>
+      Orex AI is a focused AI workspace with streaming Groq-powered replies, vision support, file context,
+      and research tools — all running client-side in a single file. It's the third of three, built with AI itself:
+      first <strong>Oppa</strong>, then <strong>Rex</strong>, now <strong>Orex</strong> — each one a rebuild
+      with everything the last one taught me.
+    </p>
     <div class="about-section">
       <h3>Features</h3>
       <ul class="feature-list">
@@ -462,15 +464,17 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
         <li>Vision support — Orex can see and discuss images you upload</li>
         <li>Text &amp; code file attachments read straight into context</li>
         <li>Temporary chats — session-only, never saved to localStorage</li>
-        <li>Double-click any chat name to rename it inline</li>
+        <li>Double-click the open chat's name to rename it inline</li>
+        <li>Delete any message you've sent (hover → Delete)</li>
         <li>Memory — Orex quietly learns facts about you across chats</li>
         <li>Research URLs, Wikipedia lookup, dictionary, quizzes</li>
         <li>Image generation, markdown + syntax-highlighted code with copy buttons</li>
         <li>Multi-chat management with JSON export and light/dark themes</li>
+        <li>Auto-adapts to Groq model rotations — never hardcodes a dying model ID</li>
       </ul>
     </div>
     <div class="about-meta">
-      <div class="about-card"><span class="about-label">Version</span><strong>v1.5</strong></div>
+      <div class="about-card"><span class="about-label">Version</span><strong>v1.6</strong></div>
       <div class="about-card"><span class="about-label">Estimate</span><strong>2025</strong></div>
       <div class="about-card"><span class="about-label">Credits</span><strong>Groq API · Phillip Jones IV</strong></div>
     </div>
@@ -556,12 +560,12 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
         <div id="settings-tab-general" class="settings-tab-content" role="tabpanel">
           <div class="settings-section-title">Profile</div>
           <div class="settings-avatar-row">
-            <div class="settings-avatar" id="settings-avatar">O</div>
-            <div class="settings-avatar-info">
-              <strong id="settings-avatar-name">Orex</strong>
-              <span>Your personal AI chat</span>
-            </div>
-          </div>
+  <div class="settings-avatar" id="settings-avatar">O</div>
+  <div class="settings-avatar-info">
+    <strong id="settings-avatar-name">Orex</strong>
+    <span>Your personal AI chat</span>
+  </div>
+</div>
           <div class="settings-group">
             <label for="rex-name">Orex's Name</label>
             <input id="rex-name" type="text" placeholder="Orex" maxlength="30">
@@ -606,7 +610,7 @@ input.rename{flex:1;min-width:0;background:var(--bg);border:1px solid var(--acce
               <input type="checkbox" id="memory-enabled-checkbox" checked>
               Let Orex remember things about you across chats
             </label>
-            <small>When on, Orex quietly picks up useful facts (your name, preferences, ongoing projects) and reuses them in future conversations — even brand new ones.</small>
+            <small>When on, Orex quietly picks up useful facts (your name, preferences, ongoing projects) and reuses them in future conversations — even brand new ones. It checks in every couple of messages.</small>
           </div>
           <div class="settings-group">
             <label>What Orex remembers</label>
@@ -651,11 +655,10 @@ const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(_){toast(
 const CFG={
   base:'https://api.groq.com/openai/v1',
   // Orex fetches your account's live model list and picks the first available
-  // model from these priority lists — Groq rotations can't break it anymore.
+  // model from these priority lists — Groq rotations can't break it.
   prefer:['llama-3.3-70b-versatile','openai/gpt-oss-120b','meta-llama/llama-4-maverick-17b-128e-instruct','llama-3.1-8b-instant'],
   visionPrefer:['meta-llama/llama-4-scout-17b-16e-instruct','meta-llama/llama-4-maverick-17b-128e-instruct'],
   fastPrefer:['llama-3.1-8b-instant','openai/gpt-oss-20b'],
-  fast:'llama-3.1-8b-instant', // fallback used by memory extraction
 };
 const MODES={
   smart:{label:'Smart',temp:.7},
@@ -665,6 +668,7 @@ const MODES={
 };
 const LOGO='<defs><linearGradient id="lgC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6cb8ff"/><stop offset="1" stop-color="#0078d7"/></linearGradient></defs><path d="M5 19.5C5 11.5 12.3 6 21 6s16 5.5 16 13.5S29.7 33 21 33c-1.9 0-3.8-.3-5.4-.8L8 35.5l1.7-5.6C6.8 27.4 5 23.7 5 19.5Z" fill="url(#lgC)"/><path d="M26 27.5c0-4.7 4.2-8 9-8s9 3.3 9 8-4.2 8-9 8c-1.1 0-2.2-.2-3.2-.5L27 37l1.3-4.2c-1.4-1.4-2.3-3.2-2.3-5.3Z" fill="#f2f7ff" stroke="#dceafd"/><circle cx="32" cy="27.5" r="1.3" fill="#4a6b8a"/><circle cx="35.5" cy="27.5" r="1.3" fill="#4a6b8a"/><circle cx="39" cy="27.5" r="1.3" fill="#4a6b8a"/>';
 const AVATAR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+const modelShort=m=>String(m).split('/').pop();
 
 /* ================= state ================= */
 let chats=load('orex.chats',[]);
@@ -729,6 +733,8 @@ function applyBrand(){
   $('#rex-header-subtitle').textContent=settings.userName?`for ${settings.userName}`:'Your AI companion';
   $('#settings-avatar').textContent=(settings.rexName||'O')[0].toUpperCase();
   $('#settings-avatar-name').textContent=settings.rexName||'Orex';
+  $('#settings-avatar-user').textContent=(settings.userName||'Y')[0].toUpperCase();
+  $('#settings-avatar-user-name').textContent=settings.userName||'You';
   document.title=(settings.rexName||'Orex')+' AI';
 }
 function setStatus(t,cls=''){const s=$('#status');s.textContent=t;s.className=cls}
@@ -763,6 +769,7 @@ function closeSidebarMobile(){$('#sidebar').classList.remove('open');$('#scrim')
   const row=e.target.closest('.chat-item');if(!row)return;
   const chat=chats.find(c=>c.id===row.dataset.id);if(!chat)return;
   if(del){deleteChat(chat);return}
+  if(activeId===chat.id)return; /* already open — don't re-render (keeps dblclick rename alive) */
   if(streaming)stopStream();
   activeId=chat.id;persistActive();
   renderChatList();renderMessages();updateCount();
@@ -838,6 +845,11 @@ function buildMsg(m,i,chat){
     acts.innerHTML='<button data-act="copy" type="button">Copy</button><button data-act="regen" type="button">Regenerate</button>';
     bub.appendChild(acts);
   }
+  if(m.role==='user'){
+    const acts=document.createElement('div');acts.className='msg-acts';
+    acts.innerHTML='<button data-act="copy" type="button">Copy</button><button data-act="del" type="button">Delete</button>';
+    bub.appendChild(acts);
+  }
   wrap.append(av,bub);
   return wrap;
 }
@@ -901,6 +913,11 @@ log.addEventListener('click',e=>{
     chat.messages.splice(i);
     persistChats();renderMessages();updateCount();
     streamReply(chat);
+  }else if(act.dataset.act==='del'){
+    if(streaming)stopStream();
+    chat.messages.splice(i,1);
+    persistChats();renderMessages();updateCount();
+    toast('Message deleted');
   }
 });
 
@@ -955,9 +972,30 @@ function humanError(status,data){
   const m=data&&data.error&&data.error.message;
   if(status===401)return 'Invalid API key — paste a fresh gsk_… key in Settings.';
   if(status===429)return 'Rate limit reached — wait a few seconds and try again.'+(m?' ('+m+')':'');
-  if(status===404)return 'Model unavailable — Groq may have rotated model IDs. Update the CFG block at the top of the code.';
   if(status===413)return 'That request was too large — try shorter text or fewer images.';
   return m?('Groq error: '+m):('Request failed ('+status+')');
+}
+
+/* ================= live model picker ================= */
+let modelCache=load('orex.models',{ids:null,ts:0});
+async function groqModels(force){
+  if(!force&&modelCache.ids&&Date.now()-modelCache.ts<3600e3)return modelCache.ids;
+  const r=await fetch(CFG.base+'/models',{headers:{'Authorization':'Bearer '+settings.apiKey}});
+  if(!r.ok)throw new Error('Could not read Groq model list ('+r.status+')');
+  const ids=((await r.json()).data||[]).map(m=>m.id);
+  modelCache={ids,ts:Date.now()};save('orex.models',modelCache);
+  return ids;
+}
+function pickFrom(ids,prefer){
+  for(const p of prefer){if(ids.includes(p))return p}
+  const rx=prefer.map(p=>p.replace(/^.*\//,'').split('-').slice(0,2).join('.*')).join('|');
+  return ids.find(id=>new RegExp(rx,'i').test(id))
+      ||ids.find(id=>/70b|120b|maverick|kimi|qwen/i.test(id))
+      ||ids[0]||null;
+}
+async function pickModel(wantsVision){
+  const ids=await groqModels();
+  return (wantsVision?pickFrom(ids,CFG.visionPrefer):null)||pickFrom(ids,CFG.prefer);
 }
 
 /* ================= send / stream ================= */
@@ -999,33 +1037,24 @@ async function sendMessage(){
   await streamReply(chat);
   maybeRemember(chat);
 }
-/* ---- live model picker: asks Groq what exists, picks the best available ---- */
-let modelCache=load('orex.models',{ids:null,ts:0});
-async function groqModels(force){
-  if(!force&&modelCache.ids&&Date.now()-modelCache.ts<3600e3)return modelCache.ids;
-  const r=await fetch(CFG.base+'/models',{headers:{'Authorization':'Bearer '+settings.apiKey}});
-  if(!r.ok)throw new Error('Could not read Groq model list ('+r.status+')');
-  const ids=((await r.json()).data||[]).map(m=>m.id);
-  modelCache={ids,ts:Date.now()};save('orex.models',modelCache);
-  return ids;
-}
-function pickFrom(ids,prefer){
-  for(const p of prefer){if(ids.includes(p))return p}
-  const rx=prefer.map(p=>p.replace(/^.*\//,'').split('-').slice(0,2).join('.*')).join('|');
-  return ids.find(id=>new RegExp(rx,'i').test(id))
-      ||ids.find(id=>/70b|120b|maverick|kimi|qwen/i.test(id))
-      ||ids[0]||null;
-}
-async function pickModel(wantsVision){
-  const ids=await groqModels();
-  return (wantsVision?pickFrom(ids,CFG.visionPrefer):null)||pickFrom(ids,CFG.prefer);
-}
-
 async function streamReply(chat){
   const lastUser=[...chat.messages].reverse().find(m=>m.role==='user');
-  const model=await pickModel(!!(lastUser&&lastUser.images&&lastUser.images.length));
-  if(!model)throw new Error('Your Groq account returned no models — generate a fresh key at console.groq.com/keys.');
-  streaming=true;setStreamUI(true);setStatus('Thinking…','busy');
+  let model;
+  try{
+    model=await pickModel(!!(lastUser&&lastUser.images&&lastUser.images.length));
+  }catch(err){
+    toast(err.message,'error');setStatus('Error','err');
+    setTimeout(()=>{if(!streaming)setStatus('Ready')},1500);
+    return;
+  }
+  if(!model){
+    toast('Your Groq account returned no models — generate a fresh key at console.groq.com/keys','error');
+    setStatus('Error','err');
+    setTimeout(()=>{if(!streaming)setStatus('Ready')},1500);
+    return;
+  }
+  setStatus(modelShort(model)+' · thinking…','busy');
+  streaming=true;setStreamUI(true);
   const aMsg={role:'assistant',content:'',ts:Date.now()};
   const ph=buildMsg(aMsg,chat.messages.length,chat);
   log.appendChild(ph);stick=true;scrollDown();
@@ -1059,12 +1088,12 @@ async function streamReply(chat){
     });
     if(!res.ok){
       if(res.status===404){
-        groqModels(true).catch(()=>{}); // force-refresh the model list for next time
-        throw new Error('That model ID no longer exists on Groq — send your message again and I\'ll auto-pick a working one.');
+        groqModels(true).catch(()=>{}); /* force-refresh the list for next time */
+        throw new Error('That model just retired mid-chat — send your message again and Orex will auto-pick a working one.');
       }
       throw new Error(humanError(res.status,await res.json().catch(()=>null)));
     }
-    setStatus('Streaming…','busy');
+    setStatus(modelShort(model)+' · streaming…','busy');
     const reader=res.body.getReader(),dec=new TextDecoder();
     let buf='';
     while(true){
@@ -1082,7 +1111,10 @@ async function streamReply(chat){
           if(j.error)throw new Error(j.error.message||'Groq stream error');
           const d=j.choices&&j.choices[0]&&j.choices[0].delta&&j.choices[0].delta.content;
           if(d){aMsg.content+=d;paint()}
-        }catch(_){/* partial JSON */}
+        }catch(err){
+          if(err.message&&err.message!=='Groq stream error'&&!/JSON/i.test(err.message))throw err;
+          if(err.message==='Groq stream error')throw err;
+        }
       }
     }
     commit();
@@ -1104,20 +1136,25 @@ async function streamReply(chat){
 }
 
 /* ================= memory ================= */
-function maybeRemember(chat){
+async function maybeRemember(chat){
   if(!settings.memoryOn||!settings.apiKey)return;
   userMsgTicks++;
-  if(userMsgTicks%3)return;
+  if(userMsgTicks%2)return;
   const recent=chat.messages.filter(m=>m.role==='user').slice(-3).map(m=>m.content).join('\n').slice(0,1500);
   if(!recent)return;
-  fetch(CFG.base+'/chat/completions',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.apiKey},
-    body:JSON.stringify({model:CFG.fast,temperature:0,messages:[
-      {role:'system',content:'Extract durable facts about the user from this snippet (name, preferences, projects, goals, constraints). Reply with ONLY a JSON array of short third-person strings, e.g. ["The user\'s name is Sam"]. If there are none, reply [].'},
-      {role:'user',content:recent}
-    ]})
-  }).then(r=>r.json()).then(j=>{
+  try{
+    const model=pickFrom(await groqModels(),CFG.fastPrefer)||await pickModel(false);
+    if(!model)throw new Error('no model available');
+    const r=await fetch(CFG.base+'/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+settings.apiKey},
+      body:JSON.stringify({model,temperature:0,messages:[
+        {role:'system',content:'Extract durable facts about the user from this snippet (name, preferences, projects, goals, constraints). Reply with ONLY a JSON array of short third-person strings, e.g. ["The user\'s name is Sam"]. If there are none, reply [].'},
+        {role:'user',content:recent}
+      ]})
+    });
+    if(!r.ok)throw new Error('extraction failed ('+r.status+')');
+    const j=await r.json();
     const txt=(j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content)||'[]';
     const m=txt.match(/\[[\s\S]*\]/);if(!m)return;
     const arr=JSON.parse(m[0]);let added=false;
@@ -1126,7 +1163,7 @@ function maybeRemember(chat){
       if(s&&!memory.some(x=>x.toLowerCase()===s.toLowerCase())){memory.push(s);added=true}
     });
     if(added){memory=memory.slice(-30);persistMemory();renderMemory()}
-  }).catch(()=>{});
+  }catch(err){console.warn('Orex memory:',err.message)}
 }
 function renderMemory(){
   const box=$('#memory-list');box.innerHTML='';
@@ -1360,7 +1397,7 @@ async function wikiSummary(t){
  $('#export-btn').addEventListener('click',async()=>{
   const saved=chats.filter(c=>!c.temp);
   if(await askConfirm('Export all chats?',`Downloads a JSON backup of ${saved.length} chat(s) + memory.`,'Export',false)){
-    const data={app:'Orex AI',version:'1.5',exported:new Date().toISOString(),chats:saved,memory};
+    const data={app:'Orex AI',version:'1.6',exported:new Date().toISOString(),chats:saved,memory};
     const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
@@ -1399,18 +1436,22 @@ function openSettings(tab='general'){
   closeModal('settings-overlay');
   toast('Settings saved','ok');
 });
- $$('.appearance-option').forEach(b=>b.addEventListener('click',()=>{
-  settings.theme=b.dataset.theme;applyTheme();persistSettings();
-  $$('.appearance-option').forEach(x=>x.classList.toggle('active',x===b));
-}));
+/* live avatar preview — updates as you type Orex's name */
+ $('#rex-name').addEventListener('input',()=>{
+  $('#settings-avatar').textContent=($('#rex-name').value.trim()||'O')[0].toUpperCase();
+});
+ $('#user-name').addEventListener('input',()=>{
+  $('#settings-avatar-user').textContent=($('#user-name').value.trim()||'Y')[0].toUpperCase();
+  $('#settings-avatar-user-name').textContent=$('#user-name').value.trim()||'You';
+});
 
 /* ================= menus / theme / mobile ================= */
 const attachMenu=$('#attach-menu'),modeMenu=$('#mode-menu'),attachBtn=$('#attach-btn'),modeBtn=$('#mode-btn');
 
+/* always writes BOTH classes together — can never get stuck in a hidden+show deadlock */
 function setMenu(menu,btn,show){
   if(show){
     menu.classList.remove('hidden');
-    // let the browser paint at opacity 0 first, then fade in
     requestAnimationFrame(()=>{ if(!menu.classList.contains('hidden')) menu.classList.add('show'); });
   }else{
     menu.classList.remove('show');
@@ -1447,6 +1488,7 @@ function updateModeLabel(){$('#mode-btn-label').textContent=MODES[settings.mode]
 });
  $('#menu-btn').addEventListener('click',()=>{$('#sidebar').classList.add('open');$('#scrim').classList.add('show')});
  $('#scrim').addEventListener('click',closeSidebarMobile);
+
 /* ================= init ================= */
 applyTheme();applyBrand();updateModeLabel();
 renderChatList();renderMessages();updateCount();renderMemory();autosize();
